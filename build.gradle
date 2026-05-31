@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '4.0.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'org.graalvm.buildtools.native' version '0.11.4'
+	id 'gg.jte.gradle' version '3.1.12'
 }
 
 group = 'com.hjusic'
@@ -25,6 +26,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'gg.jte:jte:3.1.12'
+	implementation 'gg.jte:jte-runtime:3.1.12'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
@@ -36,4 +38,21 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+jte {
+	sourceDirectory = file('src/main/jte').toPath()
+	contentType = gg.jte.ContentType.Html
+	packageName = 'gg.jte.generated.precompiled'
+	generate()
+}
+
+tasks.named('bootJar') {
+	dependsOn 'precompileJte'
+	from(fileTree('jte-classes') {
+		include '**/*.class'
+		include '**/*.bin'
+	}) {
+		into '/'
+	}
 }
